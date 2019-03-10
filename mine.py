@@ -128,10 +128,12 @@ class MineBoard:
             print("\n", end="")
 
     @staticmethod
-    def gen_seed(mine_blocks, w, h):
-        # 生成种子(保存了所有雷的坐标 + 雷区宽度 + 雷区高度)
+    def gen_seed(mine_blocks, w, h, mn):
+        # 生成种子
+        # 每个雷的坐标使用4位数保存
+        # 2位数保存雷区宽度 2位数保存雷区高度 最后4位数保存雷的个数
         seed = "".join(str(xy[0]).zfill(2) + str(xy[1]).zfill(2) for xy in mine_blocks) + \
-               str(w).zfill(2) + str(h).zfill(2)
+               str(w).zfill(2) + str(h).zfill(2) + str(mn).zfill(4)
         return hex(int(seed))[2:]
 
     @staticmethod
@@ -139,11 +141,12 @@ class MineBoard:
         # 解析种子
         try:
             seed = str(int(seed, base=16))
-            assert len(seed) % 4 == 0
-            w = int(seed[-4:-2])
-            h = int(seed[-2:])
+            w = int(seed[-8:-6])
+            h = int(seed[-6:-4])
+            mn = int(seed[-4:])
+            seed = seed.zfill((mn + 2) * 4)
             mine_blocks = set()
-            for xy in [seed[i:i+4] for i in range(0, len(seed[:-4]), 4)]:
+            for xy in (seed[i:i+4] for i in range(0, len(seed[:-8]), 4)):
                 mine_blocks.add((int(xy[:2]), int(xy[2:])))
         except:
             raise Exception("无效的种子")
@@ -179,7 +182,7 @@ class MineBoard:
                             continue
                     all_blocks.add((x, y))
             mine_blocks = random.sample(all_blocks, self.mn)
-            self.seed = self.gen_seed(mine_blocks, self.w, self.h)
+            self.seed = self.gen_seed(mine_blocks, self.w, self.h, self.mn)
         for xy in mine_blocks:
             x, y = xy
             self.board[y][x].have_mine = True
@@ -429,7 +432,7 @@ def main():
     # ~ mb = MineBoard(9, 9, 10)
     # ~ mb = MineBoard(16, 16, 40)
     mb = MineBoard(16, 30, 99)
-    # ~ seed = "42f4c911a62eba620c1906023be998312f81ff9140f76e3c880d2ab9a539bc8b7ba538c761804545aaa141141db8983232adb22752bb5a6956546084e0f3b6797910e6b0"
+    # ~ seed = "583e2e3a1230d7fa3415920384ac1395a69aa60944b8344832b18873a8a33f51287aeda9beea4e27b7f7b567ea16d041030df76088257ea6db2be8516ee87fb3d65700ccd28"
     # ~ mb = MineBoard.from_seed(seed)
     mb.logic_start()
 
