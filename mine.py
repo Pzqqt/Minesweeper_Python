@@ -366,7 +366,7 @@ class MineBoard:
     def logic_5(self):
         # 逻辑5:
         # if 未插旗数 == 1
-        # then 点开所有除二选一的两个方块之外的所有方块
+        # then 点开除二选一的两个方块之外的所有方块
         for x, y in self.get_all_clicked_not_black():
             if (not self.check_all_clicked(x, y)) and self.board[y][x].sp_flag:
                 for nxy in self.get_all_not_clicked_not_flag():
