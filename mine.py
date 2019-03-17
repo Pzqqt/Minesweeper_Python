@@ -183,15 +183,13 @@ class MineBoard:
                     all_blocks.add((x, y))
             mine_blocks = random.sample(all_blocks, self.mn)
             self.seed = self.gen_seed(mine_blocks, self.w, self.h, self.mn)
-        for xy in mine_blocks:
-            x, y = xy
+        for x, y in mine_blocks:
             self.board[y][x].have_mine = True
         # 设置数字
         for y in range(self.h):
             for x in range(self.w):
                 near_mn = 0
-                for nxy in self.list_near_blocks(x, y):
-                    nx, ny = nxy
+                for nx, ny in self.list_near_blocks(x, y):
                     if self.board[ny][nx].have_mine:
                         near_mn += 1
                 self.board[y][x].num = near_mn
@@ -211,8 +209,7 @@ class MineBoard:
         self.board[y][x].clicked = True
         # 如果点开的方块为空白块 则自动点开该方块周围所有的方块
         if self.board[y][x].num == 0:
-            for nxy in self.list_near_blocks(x, y):
-                nx, ny = nxy
+            for nx, ny in self.list_near_blocks(x, y):
                 self.click(nx, ny)
 
     def random_click(self):
@@ -280,8 +277,7 @@ class MineBoard:
     def check_all_clicked(self, x, y):
         # 判断该方块是否已经解开
         # (四周不存在既没有插旗也没有点开的方块)
-        for nxy in self.list_near_blocks(x, y):
-            nx, ny = nxy
+        for nx, ny in self.list_near_blocks(x, y):
             if not (self.board[ny][nx].clicked or self.board[ny][nx].flag):
                 return False
         return True
@@ -289,8 +285,7 @@ class MineBoard:
     def get_near_not_clicked(self, x, y):
         # 获取该方块周围所有方块中未点开的方块坐标集合
         not_clicked = set()
-        for nxy in self.list_near_blocks(x, y):
-            nx, ny = nxy
+        for nx, ny in self.list_near_blocks(x, y):
             if not self.board[ny][nx].clicked:
                 not_clicked.add((nx, ny))
         return not_clicked
@@ -298,8 +293,7 @@ class MineBoard:
     def get_near_flaged(self, x, y):
         # 获取该方块周围所有方块中已插旗的方块坐标集合
         flaged = set()
-        for nxy in self.list_near_blocks(x, y):
-            nx, ny = nxy
+        for nx, ny in self.list_near_blocks(x, y):
             if self.board[ny][nx].flag:
                 flaged.add((nx, ny))
         return flaged
@@ -308,8 +302,7 @@ class MineBoard:
         # 逻辑1:
         # if 此方块周围未打开的方块数 == 此方块的数字
         # then 给这些方块标记为雷(插旗)
-        for xy in self.get_all_clicked_not_black():
-            x, y = xy
+        for x, y in self.get_all_clicked_not_black():
             near_not_clicked = self.get_near_not_clicked(x, y)
             if len(near_not_clicked) == self.board[y][x].num:
                 for nxy in near_not_clicked:
@@ -319,8 +312,7 @@ class MineBoard:
         # 逻辑2:
         # if 此方块周围已插旗的方块数 == 此方块的数字 < 此方块周围未点开的方块数
         # then 点开此方块周围所有没插旗的方块
-        for xy in self.get_all_clicked_not_black():
-            x, y = xy
+        for x, y in self.get_all_clicked_not_black():
             near_flaged = self.get_near_flaged(x, y)
             near_not_clicked = self.get_near_not_clicked(x, y)
             if len(near_flaged) == self.board[y][x].num < len(near_not_clicked):
@@ -335,20 +327,17 @@ class MineBoard:
         # 逻辑3:
         # 非常复杂的两个方块中必有一雷的逻辑推理
         # 该逻辑方法非常混乱 并且效率很低 有待改进
-        for xy in self.get_all_clicked_not_black():
-            x, y = xy
+        for x, y in self.get_all_clicked_not_black():
             near_not_clicked = self.get_near_not_clicked(x, y)
             near_flaged = self.get_near_flaged(x, y)
             not_clicked_not_flaged = near_not_clicked - near_flaged
             if len(not_clicked_not_flaged) == 2:
                 if self.board[y][x].num - len(near_flaged) == 1:
                     self.board[y][x].sp_flag = not_clicked_not_flaged
-        for xy in self.get_all_clicked_not_black():
-            x, y = xy
+        for x, y in self.get_all_clicked_not_black():
             if not self.check_all_clicked(x, y):
                 ignore_blocks = None
-                for nxy in self.list_close_blocks(x, y):
-                    nx, ny = nxy
+                for nx, ny in self.list_close_blocks(x, y):
                     if self.board[ny][nx].sp_flag:
                         if len(self.board[ny][nx].sp_flag & self.get_near_not_clicked(x, y)) == 2:
                             ignore_blocks = self.board[ny][nx].sp_flag
@@ -378,8 +367,7 @@ class MineBoard:
         # 逻辑5:
         # if 未插旗数 == 1
         # then 点开所有除二选一的两个方块之外的所有方块
-        for xy in self.get_all_clicked_not_black():
-            x, y = xy
+        for x, y in self.get_all_clicked_not_black():
             if (not self.check_all_clicked(x, y)) and self.board[y][x].sp_flag:
                 for nxy in self.get_all_not_clicked_not_flag():
                     if nxy not in self.board[y][x].sp_flag:
